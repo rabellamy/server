@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"log"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -22,16 +21,16 @@ type Config struct {
 	Namespace          string
 }
 
-func LoadConfig(prefix string) Config {
+func LoadConfig(prefix string) (Config, error) {
 	var c Config
 	err := envconfig.Process(prefix, &c)
 	if err != nil {
-		log.Fatal(err.Error())
+		return c, err
 	}
 
 	if c.Namespace == "" {
 		c.Namespace = prefix
 	}
 
-	return c
+	return c, nil
 }

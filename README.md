@@ -36,18 +36,22 @@ import (
 )
 
 func main() {
-	// 1. Load Configuration (prefix 'TEST' means env vars like TEST_API_HOST)
-	config := httpserver.LoadConfig("test")
+	// 1. Create Logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	// 2. Define Routes
+	// 2. Load Configuration (prefix 'test' means env vars like TEST_APIHOST)
+	config, err := httpserver.LoadConfig("test")
+	if err != nil {
+		logger.Error("config loading failed", "err", err)
+		os.Exit(1)
+	}
+
+	// 3. Define Routes
 	routes := httpserver.Routes{
 		"/hello": func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "Hello, World!")
 		},
 	}
-
-	// 3. Create Logger
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	// 4. Create Server
 	server, err := httpserver.NewServer(context.Background(), config, routes, logger)

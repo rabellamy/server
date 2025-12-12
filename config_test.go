@@ -15,6 +15,7 @@ func TestLoadConfig(t *testing.T) {
 		prefix string
 		env    map[string]string
 		want   Config
+		err    error
 	}{
 		"defaults": {
 			prefix: "test_defaults",
@@ -33,6 +34,7 @@ func TestLoadConfig(t *testing.T) {
 				Desc:               "example server",
 				Namespace:          "test_defaults",
 			},
+			err: nil,
 		},
 		"env vars set": {
 			prefix: "test_env",
@@ -56,6 +58,23 @@ func TestLoadConfig(t *testing.T) {
 				Desc:               "example server",
 				Namespace:          "custom_namespace",
 			},
+			err: nil,
+		},
+		"invalid duration format": {
+			prefix: "test_invalid_dur",
+			env: map[string]string{
+				"TEST_INVALID_DUR_READTIMEOUT": "not-a-duration",
+			},
+			want: Config{},
+			err:  assert.AnError,
+		},
+		"invalid int format": {
+			prefix: "test_invalid_int",
+			env: map[string]string{
+				"TEST_INVALID_INT_MAXHEADERBYTES": "not-an-int",
+			},
+			want: Config{},
+			err:  assert.AnError,
 		},
 	}
 
@@ -65,7 +84,12 @@ func TestLoadConfig(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
-			got := LoadConfig(tt.prefix)
+			got, err := LoadConfig(tt.prefix)
+			if tt.err != nil {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

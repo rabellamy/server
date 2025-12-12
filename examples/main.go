@@ -21,14 +21,17 @@ func anotherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	config := httpserver.LoadConfig("test")
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	config, err := httpserver.LoadConfig("test")
+	if err != nil {
+		logger.Error("server instantiation failed", "err", err)
+		os.Exit(1)
+	}
 
 	routes := httpserver.Routes{
 		"/myHandler":      myHandler,
 		"/anotherHandler": anotherHandler,
 	}
-
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	server, err := httpserver.NewServer(context.Background(), config, routes, logger)
 	if err != nil {
