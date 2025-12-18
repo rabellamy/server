@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -82,6 +83,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			for k, v := range tt.env {
 				t.Setenv(k, v)
+				defer os.Unsetenv(k)
 			}
 
 			got, err := LoadConfig(tt.prefix)

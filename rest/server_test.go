@@ -156,6 +156,15 @@ func TestRun(t *testing.T) {
 			wantErr:   false,
 			preCancel: true,
 		},
+		"invalid api host": {
+			config: Config{
+				Namespace:       "test_run_invalid_api",
+				APIHost:         "invalid-host:port",
+				MetricsHost:     "localhost:0",
+				ShutdownTimeout: 5 * time.Second,
+			},
+			wantErr: true,
+		},
 	}
 
 	for name, tt := range tests {
@@ -175,20 +184,18 @@ func TestRun(t *testing.T) {
 			server, err := NewServer(ctx, tt.config, routes, logger)
 			assert.NoError(t, err)
 
+			shutdownChan := make(chan os.Signal, 1)
 			errChan := make(chan error, 1)
 			go func() {
-				errChan <- server.Run()
+				errChan <- server.run(shutdownChan)
 			}()
 
 			// Give server time to start
 			time.Sleep(50 * time.Millisecond)
 
 			if tt.sendSignal {
-				// Send SIGINT to trigger signal shutdown path
-				p, err := os.FindProcess(os.Getpid())
-				assert.NoError(t, err)
-				err = p.Signal(os.Interrupt)
-				assert.NoError(t, err)
+				// Send mock signal directly to the channel
+				shutdownChan <- os.Interrupt
 			} else if tt.cancelCtx {
 				cancel()
 			}
@@ -200,6 +207,49 @@ func TestRun(t *testing.T) {
 				err = <-errChan
 				assert.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestRunExported(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		config Config
+	}{
+		"context cancellation": {
+			config: Config{
+				Namespace:       "test_run_exported",
+				APIHost:         "localhost:0",
+				MetricsHost:     "localhost:0",
+				ShutdownTimeout: 5 * time.Second,
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+			ctx, cancel := context.WithCancel(context.Background())
+
+			server, err := NewServer(ctx, tt.config, Routes{}, logger)
+			assert.NoError(t, err)
+
+			errChan := make(chan error, 1)
+			go func() {
+				errChan <- server.Run()
+			}()
+
+			// Give it a moment to start
+			time.Sleep(50 * time.Millisecond)
+
+			// Cancel context to trigger shutdown
+			cancel()
+
+			err = <-errChan
+			assert.NoError(t, err)
 		})
 	}
 }

@@ -18,7 +18,7 @@ type REDMiddleware struct {
 
 // NewREDMiddleware creates a new RED metrics middleware.
 func NewREDMiddleware(namespace string, next http.Handler) (*REDMiddleware, error) {
-	red, err := metrics.NewRED(namespace)
+	red, err := metrics.NewRED(namespace, "http", []string{"path", "verb"}, []string{"path"})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create RED metrics: %w", err)
 	}

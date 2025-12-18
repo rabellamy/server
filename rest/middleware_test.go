@@ -55,7 +55,7 @@ func TestNewREDMiddleware(t *testing.T) {
 			want:      nil,
 			wantErr:   true,
 			setup: func() error {
-				red, err := metrics.NewRED("test_register_fail")
+				red, err := metrics.NewRED("test_register_fail", "http", []string{"path", "verb"}, []string{"path"})
 				if err != nil {
 					return err
 				}

@@ -36,7 +36,7 @@ func TestNewRED(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := NewRED(tt.namespace)
+			got, err := NewRED(tt.namespace, "http", []string{"path", "verb"}, []string{"path"})
 
 			if tt.wantErr {
 				assert.Error(t, err)

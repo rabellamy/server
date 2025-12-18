@@ -73,6 +73,10 @@ func (s *httpServer) Run() error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
+	return s.run(shutdown)
+}
+
+func (s *httpServer) run(shutdown <-chan os.Signal) error {
 	// With a buffer of 2, matching the number of producers, guarantees
 	// that neither goroutine will ever block on sending
 	serverErrors := make(chan error, 2)
@@ -92,11 +96,11 @@ func (s *httpServer) Run() error {
 		return s.shutdownServers(s.ctx, nil)
 	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)
-	case signal := <-shutdown:
+	case sig := <-shutdown:
 		ctx, cancel := context.WithTimeout(s.ctx, s.config.ShutdownTimeout)
 		defer cancel()
 
-		return s.shutdownServers(ctx, signal)
+		return s.shutdownServers(ctx, sig)
 	}
 }
 

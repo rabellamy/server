@@ -13,3 +13,7 @@ go get github.com/rabellamy/server/[rest|grpc]
 ### [rest](./rest/README.md)
 
 `rest` provides a production-ready HTTP server.
+
+### [grpc](./grpc/README.md)
+
+`grpc` provides a production-ready gRPC server.

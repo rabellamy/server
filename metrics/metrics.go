@@ -7,7 +7,8 @@ import (
 	"github.com/rabellamy/promstrap/strategy"
 )
 
-func NewRED(namespace string) (*strategy.RED, error) {
+// NewRED creates a new RED metrics instance.
+func NewRED(namespace, requestType string, requestLabels, durationLabels []string) (*strategy.RED, error) {
 	// regex matches Prometheus metric name limits
 	// see: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
 	metricNameRegex := regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
@@ -18,14 +19,14 @@ func NewRED(namespace string) (*strategy.RED, error) {
 	red, err := strategy.NewRED(strategy.REDOpts{
 		Namespace: namespace,
 		RequestsOpt: strategy.REDRequestsOpt{
-			RequestType:   "http",
-			RequestLabels: []string{"path", "verb"},
+			RequestType:   requestType,
+			RequestLabels: requestLabels,
 		},
 		ErrorsOpt: strategy.REDErrorsOpt{
 			ErrorLabels: []string{"error"},
 		},
 		DurationOpt: strategy.REDDurationOpt{
-			DurationLabels: []string{"path"},
+			DurationLabels: durationLabels,
 		},
 	})
 
