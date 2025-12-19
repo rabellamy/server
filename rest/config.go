@@ -2,8 +2,6 @@ package rest
 
 import (
 	"time"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
@@ -19,18 +17,4 @@ type Config struct {
 	Build              string        `default:"dev"`
 	Desc               string        `default:"example server"`
 	Namespace          string
-}
-
-func LoadConfig(prefix string) (Config, error) {
-	var c Config
-	err := envconfig.Process(prefix, &c)
-	if err != nil {
-		return c, err
-	}
-
-	if c.Namespace == "" {
-		c.Namespace = prefix
-	}
-
-	return c, nil
 }

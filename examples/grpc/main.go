@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/rabellamy/server/config"
 	"github.com/rabellamy/server/examples/grpc/helloworld"
 	"github.com/rabellamy/server/grpc"
 	googlegrpc "google.golang.org/grpc"
@@ -26,7 +27,7 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	// 2. Load Configuration (prefix 'test' means env vars like TEST_APIHOST)
-	config, err := grpc.LoadConfig("test")
+	config, err := config.LoadConfig[grpc.Config]("test")
 	if err != nil {
 		logger.Error("config loading failed", "err", err)
 		os.Exit(1)

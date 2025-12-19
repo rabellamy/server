@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/rabellamy/server/config"
 	"github.com/rabellamy/server/rest"
 )
 
@@ -23,7 +24,7 @@ func anotherHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	config, err := rest.LoadConfig("test")
+	config, err := config.LoadConfig[rest.Config]("test")
 	if err != nil {
 		logger.Error("server instantiation failed", "err", err)
 		os.Exit(1)

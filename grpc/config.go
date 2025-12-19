@@ -2,8 +2,6 @@ package grpc
 
 import (
 	"time"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
@@ -18,16 +16,6 @@ type Config struct {
 	Name            string        `default:"test"`
 }
 
-func LoadConfig(prefix string) (Config, error) {
-	var c Config
-	err := envconfig.Process(prefix, &c)
-	if err != nil {
-		return c, err
-	}
-
-	if c.Namespace == "" {
-		c.Namespace = prefix
-	}
-
-	return c, nil
-}
+// func GRPCConfig(prefix string) (Config, error) {
+// 	return config.LoadConfig[Config](prefix)
+// }

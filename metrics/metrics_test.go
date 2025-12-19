@@ -11,24 +11,39 @@ func TestNewRED(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		namespace string
-		want      *strategy.RED
-		wantErr   bool
+		namespace      string
+		requestLabels  []string
+		durationLabels []string
+		want           *strategy.RED
+		wantErr        bool
 	}{
 		"valid namespace": {
-			namespace: "test_metrics",
-			want:      &strategy.RED{},
-			wantErr:   false,
+			namespace:      "test_metrics",
+			requestLabels:  []string{"path", "verb"},
+			durationLabels: []string{"path"},
+			want:           &strategy.RED{},
+			wantErr:        false,
 		},
 		"empty namespace": {
-			namespace: "",
-			want:      nil,
-			wantErr:   true,
+			namespace:      "",
+			requestLabels:  []string{"path", "verb"},
+			durationLabels: []string{"path"},
+			want:           nil,
+			wantErr:        true,
 		},
 		"invalid namespace": {
-			namespace: "123invalid",
-			want:      &strategy.RED{},
-			wantErr:   true,
+			namespace:      "123invalid",
+			requestLabels:  []string{"path", "verb"},
+			durationLabels: []string{"path"},
+			want:           &strategy.RED{},
+			wantErr:        true,
+		},
+		"missing duration labels": {
+			namespace:      "valid_namespace",
+			requestLabels:  []string{"path", "verb"},
+			durationLabels: nil,
+			want:           nil,
+			wantErr:        true,
 		},
 	}
 
@@ -36,7 +51,7 @@ func TestNewRED(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := NewRED(tt.namespace, "http", []string{"path", "verb"}, []string{"path"})
+			got, err := NewRED(tt.namespace, "http", tt.requestLabels, tt.durationLabels)
 
 			if tt.wantErr {
 				assert.Error(t, err)
